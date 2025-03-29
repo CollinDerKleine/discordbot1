@@ -2,9 +2,9 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import Intents
+import logging
 from flask import Flask
 import threading
-import logging
 
 # Lade Umgebungsvariablen aus der .env-Datei
 load_dotenv()
@@ -12,19 +12,18 @@ load_dotenv()
 # Setze den Logger
 logging.basicConfig(level=logging.INFO)
 
-# Erstelle Intents-Objekt (z.B. für das Überwachen von Nachrichten)
+# Erstelle Intents-Objekt
 intents = Intents.default()
-intents.messages = True  # Aktiviert das Nachrichten-Ereignis
-intents.members = True   # Aktiviert das Mitglieder-Ereignis (falls benötigt)
+intents.messages = True  # Aktiviert Nachrichteninhalte
+intents.members = True   # Aktiviert Mitgliederereignisse (optional, falls du Mitgliederinformationen benötigst)
 
-# Initialisiere den Bot mit einem Präfix und den Intents
+# Initialisiere den Bot mit dem Präfix und den Intents
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Event, das ausgeführt wird, wenn der Bot erfolgreich eingeloggt ist
 @bot.event
 async def on_ready():
     print(f'Bot ist eingeloggt als {bot.user}')
-    # Hier kannst du weitere Initialisierungen hinzufügen, falls notwendig.
 
 # Beispiel für einen einfachen Befehl
 @bot.command()
@@ -36,20 +35,7 @@ async def hallo(ctx):
 async def hilfe(ctx):
     await ctx.send("Verfügbare Befehle: !hallo, !hilfe")
 
-# Überprüfe, ob der Bot Nachrichten korrekt verarbeitet
-@bot.event
-async def on_message(message):
-    # Verhindern, dass der Bot auf seine eigenen Nachrichten reagiert
-    if message.author == bot.user:
-        return
-
-    # Ausgabe, um zu sehen, ob Nachrichten empfangen werden
-    print(f'Nachricht empfangen: {message.content}')
-
-    # Verarbeitung von Befehlen sicherstellen
-    await bot.process_commands(message)
-
-# Flask-Webserver einrichten (falls du dies benötigst)
+# Flask-Webserver einrichten
 app = Flask(__name__)
 
 @app.route('/')
