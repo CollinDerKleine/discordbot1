@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from discord.ext import commands
+from discord import Intents
 from flask import Flask
 import threading
 import logging
@@ -10,7 +11,9 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-bot = commands.Bot(command_prefix="!")
+intents = Intents.default()
+intents.messages = True
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 @bot.event
