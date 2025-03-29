@@ -26,7 +26,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 @bot.tree.command(name="create_task", description="create an task")
-async def ping(interaction: discord.Interaction, task: str, points: int, Role_Needed: discord.role):
+async def ping(interaction: discord.Interaction, task: str, points: int, Role_Needed: discord.Role):
     await interaction.response.send_message("Pong!")
 
 
