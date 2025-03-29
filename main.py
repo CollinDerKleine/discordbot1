@@ -1,55 +1,63 @@
-from typing import Final
 import os
 from dotenv import load_dotenv
 from discord import Intents, Client, Message
 from responses import get_response
+from flask import Flask
+import threading
 
-#Token Laden von .env
+# Flask setup for health check
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!", 200
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8000)
+
+# Start Flask in a separate thread
+threading.Thread(target=run_flask, daemon=True).start()
+
+# Load token from .env
 load_dotenv()
-TOKEN: Final[str] = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
-if TOKEN==None:
-    print("Token")
-#Setup vom Bot
-intents: Intents = Intents.default()
+# Setup for the bot
+intents = Intents.default()
 intents.message_content = True
-client: Client = Client(intents=intents)
+client = Client(intents=intents)
 
-# Expiremt 
+# Handle message responses
 async def send_message(message: Message, user_message: str) -> None:
     if not user_message:
         print('(Message was empty)')
         return
-    is_private = user_message[0]== '?'                                                 
+    is_private = user_message[0] == '?'                                                 
     if is_private:
         user_message = user_message[1:]
     try:
-        response: str = get_response(user_message)
+        response = get_response(user_message)
         await message.author.send(response) if is_private else await message.channel.send(response)
-    except Exception as i:
-        print(i)
+    except Exception as e:
+        print(e)
 
-# Startup
+# Event: Bot is ready
 @client.event
-async def on_ready() -> None:
-    print(f'{client.user} is not running')
+async def on_ready():
+    print(f'{client.user} is running!')
 
-# Messages
+# Event: On message
 @client.event
-async def on_message(message: Message) -> None:
-    if message.author==client.user:
+async def on_message(message: Message):
+    if message.author == client.user:
         return
-    
-    username: str= str(message.author)
-    user_message: str = str(message.content)
-    channel: str = str(message.channel)
+    user_message = str(message.content)
+    print(f'[{message.channel}] {message.author}: "{user_message}"')
+    await send_message(message, user_message)
 
-    print(f'[{channel}] {username}: "{user_message}"')
-    await send_message(message=message, user_message=user_message)
-
-#entry point
-def main() -> None:
-    client.run(token=TOKEN)
+# Run the bot
+def main():
+    client.run(TOKEN)
 
 if __name__ == '__main__':
     main()
