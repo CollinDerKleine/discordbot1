@@ -1,53 +1,50 @@
+import discord
+from discord.ext import commands
+from discord import app_commands
+from flask import Flask
+from threading import Thread
 import os
 from dotenv import load_dotenv
-from discord.ext import commands
-from discord import Intents
-import logging
-from flask import Flask
-import threading
 
-# Lade Umgebungsvariablen aus der .env-Datei
+# Lade das Token aus der .env-Datei
 load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
 
-# Setze den Logger
-logging.basicConfig(level=logging.INFO)
-
-# Erstelle Intents-Objekt
-intents = Intents.default()
-intents.messages = True  # Aktiviert Nachrichteninhalte
-intents.members = True   # Aktiviert Mitgliederereignisse (optional, falls du Mitgliederinformationen benötigst)
-
-# Initialisiere den Bot mit dem Präfix und den Intents
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-# Event, das ausgeführt wird, wenn der Bot erfolgreich eingeloggt ist
-@bot.event
-async def on_ready():
-    print(f'Bot ist eingeloggt als {bot.user}')
-
-# Beispiel für einen einfachen Befehl
-@bot.command()
-async def hallo(ctx):
-    await ctx.send("Hallo! Wie geht's?")
-
-# Ein Beispiel für ein weiteres Kommando
-@bot.command()
-async def hilfe(ctx):
-    await ctx.send("Verfügbare Befehle: !hallo, !hilfe")
-
-# Flask-Webserver einrichten
+# Flask Webserver Setup
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot is running!"
+    return "Der Webserver läuft!"
 
-def run_flask():
-    app.run(host="0.0.0.0", port=5000)
+def run_webserver():
+    app.run(host="0.0.0.0", port=8000)
 
-# Funktion für den Flask-Server in einem eigenen Thread
-flask_thread = threading.Thread(target=run_flask)
-flask_thread.start()
+# Discord Bot Setup
+intents = discord.Intents.default()
+intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Den Bot mit dem Token starten
-bot.run(os.getenv('DISCORD_TOKEN'))
+# Slash Command Registrierung
+@bot.tree.command(name="ping", description="Antwortet mit Pong!")
+async def ping(interaction: discord.Interaction):
+    await interaction.response.send_message("Pong!")
+
+
+@bot.event
+async def on_ready():
+    await bot.tree.sync()  # Synchronisiert die Slash-Commands mit Discord
+    print(f'{bot.user} hat sich erfolgreich eingeloggt.')
+
+
+def start_bot():
+    bot.run(TOKEN)
+
+
+if __name__ == "__main__":
+    # Webserver in einem separaten Thread starten
+    web_thread = Thread(target=run_webserver)
+    web_thread.start()
+
+    # Bot starten
+    start_bot()
