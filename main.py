@@ -129,6 +129,14 @@ async def addpoints(interaction: discord.Interaction, points: int, user: discord
     else:
         await interaction.response.send_message(f"You have to be an admin to do this.")
 
+@bot.tree.command(name="pay_points", description="Transfer Points to an User")
+async def paypoints(interaction: discord.Interaction, user:discord.User, points: int):
+    if user_points[interaction.user.id] >= points:
+        user_points[interaction.user.id] -= points
+        user_points[user.id] += points
+        await interaction.response.send_message(f"Trasnfered {points} from {interaction.user}, who now has {user_points[interaction.user.id]}, to {user}, who now has {user_points[user.id]}.")
+    else:
+        await interaction.response.send_message("You dont have enough Points for that")
 
 
 
