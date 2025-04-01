@@ -2,3 +2,6 @@ discord.py
 python-dotenv
 flask
 tabulate
+PrettyTable
+tabulate
+Thread
