@@ -46,8 +46,8 @@ async def show_task(interaction: discord.Interaction):
 
     for task in Tasks:
         embed.add_field(
-            name=f"📝 {task[0]} (ID: {task[4]})",
-            value=f"**Points:** {task[1]}\n**Status:** {task[2]}\n**Role Required:** {task[3]}",
+            name=f"📝 {task[0]} (ID: {task[3]})",
+            value=f"**Points:** {task[1]}\n**Status:** {task[4]}\n**Role Required:** {task[2]}",
             inline=False
         )
 
@@ -129,14 +129,6 @@ async def addpoints(interaction: discord.Interaction, points: int, user: discord
     else:
         await interaction.response.send_message(f"You have to be an admin to do this.")
 
-@bot.tree.command(name="pay_points", description="Transfer Points to an User")
-async def paypoints(interaction: discord.Interaction, user:discord.User, points: int):
-    if user_points[interaction.user.id] >= points:
-        user_points[interaction.user.id] -= points
-        user_points[user.id] += points
-        await interaction.response.send_message(f"Trasnfered {points} from {interaction.user}, who now has {user_points[interaction.user.id]}, to {user}, who now has {user_points[user.id]}.")
-    else:
-        await interaction.response.send_message("You dont have enough Points for that")
 
 
 
